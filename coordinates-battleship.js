@@ -1,3 +1,4 @@
+ReactDOM.render(React.createElement(CoordinatesBattleship), document.getElementById("root"));
 // coordinates-battleship.js
 import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
