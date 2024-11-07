@@ -1,8 +1,6 @@
-ReactDOM.render(React.createElement(CoordinatesBattleship), document.getElementById("root"));
 // coordinates-battleship.js
-import React, { useState } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+
+const { useState } = React;
 
 const CoordinatesBattleship = () => {
   const GRID_SIZE = 10;
@@ -45,7 +43,7 @@ const CoordinatesBattleship = () => {
     const ships = [];
     const occupied = new Set(ISLANDS.map(i => `${i.x},${i.y}`));
 
-    for (const {size, name} of SHIP_SIZES) {
+    for (const { size, name } of SHIP_SIZES) {
       let placed = false;
       while (!placed) {
         const horizontal = Math.random() < 0.5;
@@ -98,7 +96,6 @@ const CoordinatesBattleship = () => {
 
   const handleCellSelect = (x, y) => {
     if (!gameState.gameStarted) return;
-    
     if (gameState.shots.some(shot => shot.x === x && shot.y === y)) return;
     
     setGameState(prev => ({
@@ -110,14 +107,12 @@ const CoordinatesBattleship = () => {
   const handleShot = () => {
     if (!gameState.selectedCell || !gameState.gameStarted) return;
     const { x, y } = gameState.selectedCell;
-    
-    if (gameState.shots.some(shot => shot.x === x && shot.y === y)) {
-      return;
-    }
+
+    if (gameState.shots.some(shot => shot.x === x && shot.y === y)) return;
 
     const newShots = [...gameState.shots, { x, y }];
     let hitShipIndex = -1;
-    
+
     gameState.ships.forEach((ship, index) => {
       if (ship.positions.some(pos => pos.x === x && pos.y === y)) {
         hitShipIndex = index;
@@ -125,7 +120,6 @@ const CoordinatesBattleship = () => {
     });
 
     const newHits = hitShipIndex >= 0 ? [...gameState.hits, { x, y }] : gameState.hits;
-    
     const newShipStatus = [...gameState.shipStatus];
     if (hitShipIndex >= 0) {
       newShipStatus[hitShipIndex] = {
@@ -149,98 +143,41 @@ const CoordinatesBattleship = () => {
     const isShot = gameState.shots.some(shot => shot.x === x && shot.y === y);
     const isHit = gameState.hits.some(hit => hit.x === x && hit.y === y);
     const isSelected = gameState.selectedCell?.x === x && gameState.selectedCell?.y === y;
-    
-    let className = "w-full aspect-square border flex items-center justify-center relative ";
-    if (isIsland) {
-      className += "cursor-not-allowed";
-    } else if (isShot) {
-      className += isHit ? "bg-red-200 cursor-default " : "bg-gray-200 cursor-default ";
-    } else {
-      className += "cursor-pointer ";
-      if (isSelected) {
-        className += "bg-yellow-200 ";
-      } else {
-        className += "hover:bg-blue-100 ";
-      }
-    }
+
+    const className = `cell ${isIsland ? 'island' : isShot ? (isHit ? 'hit' : 'miss') : isSelected ? 'selected' : 'sea'}`;
 
     return (
-      <div 
-        key={`${x}-${y}`} 
+      <div
+        key={`${x}-${y}`}
         className={className}
         onClick={() => !isIsland && !isShot && handleCellSelect(x, y)}
-        style={{
-          backgroundColor: isIsland ? COLORS.island : 
-                          isShot ? (isHit ? "rgb(254, 202, 202)" : "rgb(229, 231, 235)") :
-                          isSelected ? "rgb(254, 240, 138)" : COLORS.sea
-        }}
+        style={{ backgroundColor: isIsland ? COLORS.island : isShot ? (isHit ? 'rgb(254, 202, 202)' : 'rgb(229, 231, 235)') : COLORS.sea }}
       >
-        {isShot && (
-          <div className="text-2xl">
-            {isHit ? "🎯" : "💨"}
-          </div>
-        )}
-        {isSelected && (
-          <div className="absolute -top-8 bg-black text-white p-1 rounded text-xs whitespace-nowrap">
-            {coords.lat}, {coords.lon}
-          </div>
-        )}
+        {isShot && (isHit ? "🎯" : "💨")}
+        {isSelected && <div className="coords">{coords.lat}, {coords.lon}</div>}
       </div>
     );
   };
 
   return (
-    <Card className="w-full max-w-2xl">
-      <CardHeader className="bg-gradient-to-r from-white to-[#253764]">
-        <CardTitle className="flex justify-between items-center">
-          <span style={{ color: COLORS.navy }}>Laivanupotus koordinaateilla</span>
-          <Button 
-            onClick={startGame}
-            className="bg-[#253764] hover:bg-[#324b85]"
-          >
-            {gameState.gameStarted ? "Uusi peli" : "Aloita peli"}
-          </Button>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-full grid grid-cols-10 gap-0">
-            {Array.from({ length: GRID_SIZE }).map((_, y) =>
-              Array.from({ length: GRID_SIZE }).map((_, x) => renderCell(x, y))
-            )}
-          </div>
-          {gameState.selectedCell && (
-            <Button 
-              onClick={handleShot}
-              className="bg-[#253764] hover:bg-[#324b85]"
-            >
-              Ammu valittuun ruutuun
-            </Button>
-          )}
-          <div className="text-sm space-y-2">
-            <p style={{ color: COLORS.navy }}>
-              <span style={{ color: COLORS.island }}>⬤</span> Saaret | 🎯 Osuma | 💨 Huti
-            </p>
-            {gameState.gameStarted && (
-              <div className="mt-4">
-                <p className="font-bold mb-2" style={{ color: COLORS.navy }}>Laivojen tila:</p>
-                {gameState.shipStatus.map((ship, index) => (
-                  <div key={index} className="flex justify-between" style={{ color: COLORS.navy }}>
-                    <span>{ship.name} ({ship.size} ruutua)</span>
-                    <span>
-                      {isShipDestroyed(index) 
-                        ? "Tuhottu! 💥" 
-                        : `Osumat: ${ship.hits}/${ship.size}`}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="game-container">
+      <h1 style={{ color: COLORS.navy }}>Laivanupotus koordinaateilla</h1>
+      <button onClick={startGame} style={{ backgroundColor: COLORS.navy, color: 'white' }}>
+        {gameState.gameStarted ? "Uusi peli" : "Aloita peli"}
+      </button>
+      <div className="grid">
+        {Array.from({ length: GRID_SIZE }).map((_, y) =>
+          Array.from({ length: GRID_SIZE }).map((_, x) => renderCell(x, y))
+        )}
+      </div>
+      {gameState.selectedCell && (
+        <button onClick={handleShot} style={{ backgroundColor: COLORS.navy, color: 'white' }}>
+          Ammu valittuun ruutuun
+        </button>
+      )}
+    </div>
   );
 };
 
-export default CoordinatesBattleship;
+// Render the game component
+ReactDOM.render(React.createElement(CoordinatesBattleship), document.getElementById("root"));
