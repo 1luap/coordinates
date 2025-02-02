@@ -1,5 +1,3 @@
-// coordinates-battleship.js
-
 const { useState } = React;
 
 const CoordinatesBattleship = () => {
@@ -90,10 +88,6 @@ const CoordinatesBattleship = () => {
     });
   };
 
-  const isShipDestroyed = (shipIndex) => {
-    return gameState.shipStatus[shipIndex]?.hits === gameState.shipStatus[shipIndex]?.size;
-  };
-
   const handleCellSelect = (x, y) => {
     if (!gameState.gameStarted) return;
     if (gameState.shots.some(shot => shot.x === x && shot.y === y)) return;
@@ -162,7 +156,7 @@ const CoordinatesBattleship = () => {
   return (
     <div className="game-container">
       <h1 style={{ color: COLORS.navy }}>Laivanupotus koordinaateilla</h1>
-      <button onClick={startGame} style={{ backgroundColor: COLORS.navy, color: 'white' }}>
+      <button onClick={startGame}>
         {gameState.gameStarted ? "Uusi peli" : "Aloita peli"}
       </button>
       <div className="grid">
@@ -171,7 +165,7 @@ const CoordinatesBattleship = () => {
         )}
       </div>
       {gameState.selectedCell && (
-        <button onClick={handleShot} style={{ backgroundColor: COLORS.navy, color: 'white' }}>
+        <button onClick={handleShot}>
           Ammu valittuun ruutuun
         </button>
       )}
@@ -179,5 +173,5 @@ const CoordinatesBattleship = () => {
   );
 };
 
-// Render the game component
-ReactDOM.render(React.createElement(CoordinatesBattleship), document.getElementById("root"));
+// Renderöidään peli
+ReactDOM.render(<CoordinatesBattleship />, document.getElementById("root"));
